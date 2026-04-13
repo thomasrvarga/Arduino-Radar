@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arduino Nano Radar Wiring Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0f0a;
+    color: #00ff88;
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    color: #00ff88;
+    text-shadow: 0 0 12px #00ff8866;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 0.7rem;
+    color: #00ff8866;
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+  }
+  .diagram-wrap {
+    width: 100%;
+    max-width: 960px;
+    background: #0d140d;
+    border: 1px solid #00ff8833;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 0 40px #00ff8811;
+  }
+  svg { width: 100%; height: auto; display: block; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: #00ff8899;
+  }
+  .legend-line { width: 28px; height: 3px; border-radius: 2px; }
+  .pin-table {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 960px;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+  }
+  .pin-table th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: #00ff88aa;
+    border-bottom: 1px solid #00ff8833;
+    padding: 6px 12px;
+    text-align: left;
+  }
+  .pin-table td {
+    padding: 5px 12px;
+    border-bottom: 1px solid #00ff8811;
+    color: #00ff88cc;
+  }
+  .pin-table tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<h1>ARDUINO RADAR // WIRING DIAGRAM</h1>
+<p class="subtitle">HC-SR04 + SG90 SERVO + I2C LCD — NANO</p>
+
+<div class="diagram-wrap">
+<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#00ff8808" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="520" fill="url(#grid)"/>
+
+  <!-- =================== ARDUINO NANO =================== -->
+  <!-- Nano is narrow and long, oriented vertically -->
+  <g id="nano">
+    <!-- Board body -->
+    <rect x="370" y="170" width="100" height="220" rx="5" fill="#1a2e1a" stroke="#00ff8877" stroke-width="1.5"/>
+    <!-- USB mini port at top -->
+    <rect x="388" y="158" width="24" height="14" rx="3" fill="#333" stroke="#00ff8844" stroke-width="1"/>
+    <text x="400" y="152" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#00ff8866">USB</text>
+
+    <text x="420" y="188" text-anchor="middle" font-family="Orbitron,monospace" font-size="7" fill="#00ff88" letter-spacing="1">NANO</text>
+
+    <!-- LEFT SIDE PINS (D-pins) -->
+    <!-- D6 - Servo Signal -->
+    <rect x="362" y="200" width="8" height="6" rx="1" fill="#ffcc0044" stroke="#ffcc00" stroke-width="1"/>
+    <text x="358" y="206" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#ffcc00">D6</text>
+
+    <!-- D9 - Trig -->
+    <rect x="362" y="218" width="8" height="6" rx="1" fill="#ff444444" stroke="#ff4444" stroke-width="1"/>
+    <text x="358" y="224" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#ff4444">D9</text>
+
+    <!-- D10 - Echo -->
+    <rect x="362" y="236" width="8" height="6" rx="1" fill="#ff880044" stroke="#ff8800" stroke-width="1"/>
+    <text x="358" y="242" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#ff8800">D10</text>
+
+    <!-- 5V left -->
+    <rect x="362" y="254" width="8" height="6" rx="1" fill="#ff444466" stroke="#ff4444" stroke-width="1"/>
+    <text x="358" y="260" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#ff4444">5V</text>
+
+    <!-- GND left -->
+    <rect x="362" y="272" width="8" height="6" rx="1" fill="#44444466" stroke="#888" stroke-width="1"/>
+    <text x="358" y="278" text-anchor="end" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#888">GND</text>
+
+    <!-- RIGHT SIDE PINS (A-pins) -->
+    <!-- A4 - SDA -->
+    <rect x="470" y="218" width="8" height="6" rx="1" fill="#00ccff44" stroke="#00ccff" stroke-width="1"/>
+    <text x="482" y="224" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#00ccff">A4</text>
+
+    <!-- A5 - SCL -->
+    <rect x="470" y="236" width="8" height="6" rx="1" fill="#aa88ff44" stroke="#aa88ff" stroke-width="1"/>
+    <text x="482" y="242" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#aa88ff">A5</text>
+
+    <!-- 5V right -->
+    <rect x="470" y="254" width="8" height="6" rx="1" fill="#ff444466" stroke="#ff4444" stroke-width="1"/>
+    <text x="482" y="260" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#ff4444">5V</text>
+
+    <!-- GND right -->
+    <rect x="470" y="272" width="8" height="6" rx="1" fill="#44444466" stroke="#888" stroke-width="1"/>
+    <text x="482" y="278" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#888">GND</text>
+  </g>
+
+  <!-- =================== HC-SR04 =================== -->
+  <g id="hcsr04">
+    <rect x="590" y="60" width="150" height="90" rx="5" fill="#1a1a2e" stroke="#ff884455" stroke-width="1.5"/>
+    <text x="665" y="78" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" fill="#ff8844" letter-spacing="1">HC-SR04</text>
+    <circle cx="630" cy="128" r="15" fill="#222233" stroke="#ff8844" stroke-width="1.5"/>
+    <circle cx="700" cy="128" r="15" fill="#222233" stroke="#ff8844" stroke-width="1.5"/>
+    <circle cx="630" cy="128" r="8" fill="#ff884422"/>
+    <circle cx="700" cy="128" r="8" fill="#ff884422"/>
+    <!-- Pins bottom -->
+    <rect x="601" y="147" width="6" height="8" rx="1" fill="#ff4444" stroke="#ff4444" stroke-width="1"/>
+    <text x="604" y="166" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff4444">VCC</text>
+    <rect x="618" y="147" width="6" height="8" rx="1" fill="#888" stroke="#888" stroke-width="1"/>
+    <text x="621" y="166" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#888">GND</text>
+    <rect x="635" y="147" width="6" height="8" rx="1" fill="#ff444488" stroke="#ff4444" stroke-width="1"/>
+    <text x="638" y="166" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff4444">TRG</text>
+    <rect x="652" y="147" width="6" height="8" rx="1" fill="#ff880088" stroke="#ff8800" stroke-width="1"/>
+    <text x="655" y="166" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff8800">ECH</text>
+  </g>
+
+  <!-- =================== SG90 SERVO =================== -->
+  <g id="servo">
+    <rect x="590" y="310" width="130" height="75" rx="5" fill="#1a2820" stroke="#ffcc0055" stroke-width="1.5"/>
+    <text x="655" y="328" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" fill="#ffcc00" letter-spacing="1">SG90 SERVO</text>
+    <rect x="620" y="338" width="70" height="12" rx="6" fill="#ffcc0022" stroke="#ffcc00" stroke-width="1"/>
+    <circle cx="655" cy="344" r="6" fill="#ffcc0044" stroke="#ffcc00" stroke-width="1"/>
+    <!-- Pins bottom -->
+    <rect x="601" y="382" width="6" height="8" rx="1" fill="#ff4444" stroke="#ff4444" stroke-width="1"/>
+    <text x="604" y="400" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff4444">5V</text>
+    <rect x="618" y="382" width="6" height="8" rx="1" fill="#888" stroke="#888" stroke-width="1"/>
+    <text x="621" y="400" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#888">GND</text>
+    <rect x="635" y="382" width="6" height="8" rx="1" fill="#ffcc0088" stroke="#ffcc00" stroke-width="1"/>
+    <text x="638" y="400" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ffcc00">SIG</text>
+  </g>
+
+  <!-- =================== LCD I2C =================== -->
+  <g id="lcd">
+    <rect x="90" y="170" width="170" height="100" rx="5" fill="#001a33" stroke="#00ccff55" stroke-width="1.5"/>
+    <text x="175" y="188" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" fill="#00ccff" letter-spacing="1">I2C LCD 16x2</text>
+    <rect x="104" y="194" width="142" height="48" rx="2" fill="#003366" stroke="#00ccff33" stroke-width="1"/>
+    <text x="175" y="212" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#00ccff88">Distance: XX cm</text>
+    <text x="175" y="228" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#00ccff55">CAUTION</text>
+    <!-- Pins bottom -->
+    <rect x="105" y="266" width="6" height="8" rx="1" fill="#ff4444" stroke="#ff4444" stroke-width="1"/>
+    <text x="108" y="284" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff4444">VCC</text>
+    <rect x="122" y="266" width="6" height="8" rx="1" fill="#888" stroke="#888" stroke-width="1"/>
+    <text x="125" y="284" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#888">GND</text>
+    <rect x="139" y="266" width="6" height="8" rx="1" fill="#00ccff88" stroke="#00ccff" stroke-width="1"/>
+    <text x="142" y="284" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#00ccff">SDA</text>
+    <rect x="156" y="266" width="6" height="8" rx="1" fill="#aa88ff88" stroke="#aa88ff" stroke-width="1"/>
+    <text x="159" y="284" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="7" fill="#aa88ff">SCL</text>
+  </g>
+
+  <!-- =================== WIRES =================== -->
+
+  <!-- HC-SR04 VCC -> Nano 5V (left) -->
+  <path d="M 604 155 L 604 180 L 560 180 L 560 257 L 370 257" fill="none" stroke="#ff4444" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- HC-SR04 GND -> Nano GND (left) -->
+  <path d="M 621 155 L 621 186 L 556 186 L 556 275 L 370 275" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- HC-SR04 TRIG -> D9 -->
+  <path d="M 638 155 L 638 192 L 552 192 L 552 221 L 370 221" fill="none" stroke="#ff4444" stroke-width="1.8"/>
+
+  <!-- HC-SR04 ECHO -> D10 -->
+  <path d="M 655 155 L 655 198 L 548 198 L 548 239 L 370 239" fill="none" stroke="#ff8800" stroke-width="1.8"/>
+
+  <!-- SERVO 5V -> Nano 5V (left) shared rail -->
+  <path d="M 604 382 L 604 420 L 544 420 L 544 257 L 370 257" fill="none" stroke="#ff4444" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- SERVO GND -> Nano GND (left) shared rail -->
+  <path d="M 621 382 L 621 430 L 540 430 L 540 275 L 370 275" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- SERVO SIG -> D6 -->
+  <path d="M 638 382 L 638 460 L 336 460 L 336 203 L 362 203" fill="none" stroke="#ffcc00" stroke-width="1.8"/>
+
+  <!-- LCD VCC -> Nano 5V (right) -->
+  <path d="M 108 266 L 108 300 L 60 300 L 60 257 L 370 257" fill="none" stroke="#ff4444" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- LCD GND -> Nano GND (right) -->
+  <path d="M 125 266 L 125 308 L 54 308 L 54 275 L 370 275" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="5,2"/>
+
+  <!-- LCD SDA -> A4 -->
+  <path d="M 142 266 L 142 320 L 500 320 L 500 221 L 478 221" fill="none" stroke="#00ccff" stroke-width="1.8"/>
+
+  <!-- LCD SCL -> A5 -->
+  <path d="M 159 266 L 159 330 L 506 330 L 506 239 L 478 239" fill="none" stroke="#aa88ff" stroke-width="1.8"/>
+
+  <!-- Junction dots -->
+  <circle cx="370" cy="257" r="3" fill="#ff4444"/>
+  <circle cx="370" cy="275" r="3" fill="#888"/>
+  <circle cx="370" cy="221" r="3" fill="#ff4444"/>
+  <circle cx="370" cy="239" r="3" fill="#ff8800"/>
+  <circle cx="362" cy="203" r="3" fill="#ffcc00"/>
+  <circle cx="478" cy="221" r="3" fill="#00ccff"/>
+  <circle cx="478" cy="239" r="3" fill="#aa88ff"/>
+
+  <!-- Wire labels -->
+  <text x="344" y="197" font-family="Share Tech Mono,monospace" font-size="7" fill="#ffcc00">SIG→D6</text>
+  <text x="372" y="215" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff4444">TRIG→D9</text>
+  <text x="372" y="233" font-family="Share Tech Mono,monospace" font-size="7" fill="#ff8800">ECHO→D10</text>
+  <text x="482" y="215" font-family="Share Tech Mono,monospace" font-size="7" fill="#00ccff">SDA→A4</text>
+  <text x="482" y="233" font-family="Share Tech Mono,monospace" font-size="7" fill="#aa88ff">SCL→A5</text>
+
+</svg>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:#ff4444"></div> 5V / VCC</div>
+  <div class="legend-item"><div class="legend-line" style="background:#888"></div> GND</div>
+  <div class="legend-item"><div class="legend-line" style="background:#ff4444"></div> TRIG → D9</div>
+  <div class="legend-item"><div class="legend-line" style="background:#ff8800"></div> ECHO → D10</div>
+  <div class="legend-item"><div class="legend-line" style="background:#ffcc00"></div> SERVO SIG → D6</div>
+  <div class="legend-item"><div class="legend-line" style="background:#00ccff"></div> SDA → A4</div>
+  <div class="legend-item"><div class="legend-line" style="background:#aa88ff"></div> SCL → A5</div>
+</div>
+
+<table class="pin-table">
+  <thead>
+    <tr>
+      <th>COMPONENT</th>
+      <th>PIN</th>
+      <th>NANO PIN</th>
+      <th>WIRE COLOR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>HC-SR04</td><td>VCC</td><td>5V</td><td style="color:#ff4444">■ Red</td></tr>
+    <tr><td>HC-SR04</td><td>GND</td><td>GND</td><td style="color:#888">■ Black</td></tr>
+    <tr><td>HC-SR04</td><td>TRIG</td><td>D9</td><td style="color:#ff4444">■ Red (solid)</td></tr>
+    <tr><td>HC-SR04</td><td>ECHO</td><td>D10</td><td style="color:#ff8800">■ Orange</td></tr>
+    <tr><td>SG90 Servo</td><td>VCC</td><td>5V</td><td style="color:#ff4444">■ Red</td></tr>
+    <tr><td>SG90 Servo</td><td>GND</td><td>GND</td><td style="color:#888">■ Black/Brown</td></tr>
+    <tr><td>SG90 Servo</td><td>SIGNAL</td><td>D6</td><td style="color:#ffcc00">■ Yellow/Orange</td></tr>
+    <tr><td>LCD (I2C)</td><td>VCC</td><td>5V</td><td style="color:#ff4444">■ Red</td></tr>
+    <tr><td>LCD (I2C)</td><td>GND</td><td>GND</td><td style="color:#888">■ Black</td></tr>
+    <tr><td>LCD (I2C)</td><td>SDA</td><td>A4</td><td style="color:#00ccff">■ Blue</td></tr>
+    <tr><td>LCD (I2C)</td><td>SCL</td><td>A5</td><td style="color:#aa88ff">■ Purple</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>
