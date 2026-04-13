@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: #030b05; overflow: hidden; font-family: "IBM Plex Mono", monospace; color: rgba(180,255,200,0.92); }
+#app { display: grid; grid-template-columns: 1fr 185px; height: 100vh; }
+.radar-side { position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 28px; overflow: hidden; }
+canvas { display: block; }
+.top-left { position: absolute; top: 14px; left: 18px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+.s-row { display: flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: rgba(180,255,200,0.45); }
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: rgba(255,255,255,0.12); }
+.dot.live { background: #00ff64; box-shadow: 0 0 5px #00ff64; animation: pulse 2s ease-in-out infinite; }
+.dot.warn { background: #ffd166; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.top-right { position: absolute; top: 14px; right: 18px; text-align: right; pointer-events: none; }
+.ang-big { font-size: 44px; font-weight: 300; color: rgba(0,255,100,0.82); line-height: 1; letter-spacing: -.02em; }
+.ang-unit { font-size: 12px; color: rgba(0,255,100,0.28); margin-left: 2px; }
+.dist-val { font-size: 13px; color: rgba(255,90,110,0.75); margin-top: 3px; min-height: 18px; }
+.panel { border-left: 1px solid rgba(0,255,100,0.08); display: flex; flex-direction: column; padding: 18px 14px; }
+.p-title { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(0,255,100,0.28); margin-bottom: 14px; }
+.conn-btn { width: 100%; padding: 10px 0; background: rgba(0,255,100,0.05); border: 1px solid rgba(0,255,100,0.2); border-radius: 3px; color: rgba(0,255,100,0.72); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .14s; margin-bottom: 7px; }
+.conn-btn:hover { background: rgba(0,255,100,0.1); border-color: rgba(0,255,100,0.45); color: #00ff64; }
+.conn-btn.live { border-color: #00ff64; color: #00ff64; background: rgba(0,255,100,0.07); }
+.demo-btn { width: 100%; padding: 7px 0; background: transparent; border: 1px solid rgba(255,255,255,0.07); border-radius: 3px; color: rgba(255,255,255,0.22); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .14s; }
+.demo-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.45); }
+.demo-btn.on { border-color: rgba(255,200,80,0.35); color: rgba(255,200,80,0.62); }
+.divider { height: 1px; background: rgba(0,255,100,0.07); margin: 14px 0; }
+.obj-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(0,255,100,0.28); margin-bottom: 7px; }
+.obj-count { font-size: 36px; font-weight: 300; color: rgba(255,80,100,0.8); line-height: 1; margin-bottom: 10px; }
+.obj-count span { font-size: 10px; color: rgba(255,80,100,0.38); margin-left: 2px; }
+.det-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+.det-list::-webkit-scrollbar { width: 2px; }
+.det-list::-webkit-scrollbar-thumb { background: rgba(0,255,100,0.15); }
+.det-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 4px; font-size: 10px; padding: 5px 7px; border-radius: 2px; background: rgba(255,70,90,0.05); border-left: 2px solid rgba(255,70,90,0.32); }
+.det-row .a { color: rgba(180,255,200,0.55); }
+.det-row .d { color: rgba(255,100,120,0.88); }
+.det-row .c { color: rgba(255,200,80,0.5); font-size: 9px; text-align: right; }
+.clr-btn { margin-top: 10px; width: 100%; padding: 6px 0; background: transparent; border: 1px solid rgba(255,255,255,0.06); border-radius: 3px; color: rgba(255,255,255,0.18); font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .14s; }
+.clr-btn:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.42); }
+.hint { margin-top: auto; padding-top: 12px; font-size: 9px; color: rgba(0,255,100,0.18); line-height: 1.9; }
+.lock-badge { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,75,100,0.1); border: 1px solid rgba(255,75,100,0.4); border-radius: 3px; margin-bottom: 10px; }
+.lock-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff4d6a; box-shadow: 0 0 6px #ff4d6a; animation: pulse 1s ease-in-out infinite; flex-shrink: 0; }
+.lock-text { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,100,120,0.9); }
+.scan-badge { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(0,255,100,0.05); border: 1px solid rgba(0,255,100,0.15); border-radius: 3px; margin-bottom: 10px; }
+.scan-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,255,100,0.6); flex-shrink: 0; animation: pulse 2s ease-in-out infinite; }
+.scan-text { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(0,255,100,0.6); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="radar-side" id="rs">
+    <canvas id="rc"></canvas>
+    <div class="top-left">
+      <div class="s-row"><div class="dot warn" id="sd"></div><span id="sm">waiting for serial</span></div>
+      <div class="s-row" id="fps-row" style="opacity:0"><div class="dot" style="background:rgba(0,255,100,0.2)"></div><span id="sf">—</span></div>
+    </div>
+    <div class="top-right">
+      <div><span class="ang-big" id="anum">—</span><span class="ang-unit">°</span></div>
+      <div class="dist-val" id="adist"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="p-title">Radar</div>
+    <div class="lock-badge" id="lock-badge"><div class="lock-dot"></div><div class="lock-text">Locked on</div></div>
+    <div class="scan-badge" id="scan-badge"><div class="scan-dot"></div><div class="scan-text">Scanning</div></div>
+    <button class="conn-btn" id="bser" onclick="connectSerial()">Connect serial</button>
+    <button class="demo-btn" id="bdemo" onclick="setDemo()">Demo mode</button>
+    <div class="divider"></div>
+    <div class="obj-label">Objects</div>
+    <div class="obj-count" id="ocount">0<span>found</span></div>
+    <div class="det-list" id="dlist"></div>
+    <button class="clr-btn" onclick="clearAll()">Clear</button>
+    <div class="hint">Chrome / Edge<br>9600 baud<br>angle,dist</div>
+  </div>
+</div>
+<script>
+var MAX_DIST   = 50;
+var FADE_TICKS = 200;
+var GROUP_DEG  = 12;
+var LERP       = 0.14;
+var FAN_DEG    = 20;
+
+var canvas    = document.getElementById("rc");
+var ctx       = canvas.getContext("2d");
+var rsEl      = document.getElementById("rs");
+var offscreen = document.createElement("canvas");
+var octx      = offscreen.getContext("2d");
+
+var R = 200, CX = 400, CY = 250, gridDirty = true;
+var targetAngle = 0, displayAngle = 0;
+var tick = 0, pts = [], rawHits = {}, objects = [], nextId = 1;
+var isLocked = false, lockedAngle = 0, lockedDist = 0;
+var demoInt = null, serialRdr = null, demoAng = 0, demoFwd = true;
+var lastFpsT = performance.now(), fpsCount = 0;
+
+var DEMO_OBJS = [{a:40,d:22},{a:90,d:15},{a:148,d:30}];
+
+// Angle mapping:
+// Servo 0 = right side, 90 = top, 180 = left side
+// toXY: servo deg -> canvas x,y
+// Standard math: 0 rad = right, pi/2 = up, pi = left  (CCW)
+// Canvas y is flipped: y = CY - r*sin(rad) so up is negative y = correct
+function toXY(r, deg) {
+  var rad = (deg / 180) * Math.PI;
+  return [CX + r * Math.cos(rad), CY - r * Math.sin(rad)];
+}
+
+// Convert servo deg to the angle used by canvas.arc()
+// canvas.arc uses CW angles from +x (right)
+// Our toXY is CCW (standard math), so canvas angle = -rad = -(deg/180)*PI
+function toCanvasAngle(deg) {
+  return -(deg / 180) * Math.PI;
+}
+
+function resize() {
+  var cw = rsEl.clientWidth, ch = rsEl.clientHeight;
+  R  = Math.max(Math.min((cw - 120) / 2, ch - 68), 80);
+  CX = cw / 2; CY = R + 48;
+  canvas.width = cw; canvas.height = R + 68;
+  offscreen.width = cw; offscreen.height = canvas.height;
+  gridDirty = true;
+}
+
+function buildGrid() {
+  octx.clearRect(0, 0, offscreen.width, offscreen.height);
+
+  // Dark background semicircle
+  octx.beginPath();
+  octx.arc(CX, CY, R, 0, Math.PI, true);
+  octx.fillStyle = "rgba(0,28,10,0.92)";
+  octx.fill();
+
+  // Subtle radial glow from center
+  var grd = octx.createRadialGradient(CX, CY, 0, CX, CY, R);
+  grd.addColorStop(0,   "rgba(0,180,70,0.07)");
+  grd.addColorStop(0.6, "rgba(0,100,40,0.02)");
+  grd.addColorStop(1,   "transparent");
+  octx.beginPath(); octx.arc(CX, CY, R, 0, Math.PI, true);
+  octx.fillStyle = grd; octx.fill();
+
+  // Range rings
+  for (var i = 1; i <= 4; i++) {
+    var r = R / 4 * i;
+    octx.beginPath(); octx.arc(CX, CY, r, 0, Math.PI, true);
+    octx.strokeStyle = i === 4 ? "rgba(0,255,100,0.18)" : "rgba(0,255,100,0.055)";
+    octx.lineWidth   = i === 4 ? 1.1 : 0.7;
+    octx.setLineDash(i < 4 ? [3, 10] : []);
+    octx.stroke(); octx.setLineDash([]);
+    var lp = toXY(r, 175);
+    octx.fillStyle = "rgba(0,255,100,0.3)";
+    octx.font = "8px IBM Plex Mono"; octx.textAlign = "right";
+    octx.fillText(Math.round(MAX_DIST / 4 * i) + "cm", lp[0] - 3, lp[1] - 2);
+  }
+
+  // Spokes + labels
+  for (var a = 0; a <= 180; a += 15) {
+    var sp = toXY(R, a);
+    octx.beginPath(); octx.moveTo(CX, CY); octx.lineTo(sp[0], sp[1]);
+    octx.strokeStyle = a % 30 === 0 ? "rgba(0,255,100,0.1)" : "rgba(0,255,100,0.035)";
+    octx.lineWidth = 0.7; octx.stroke();
+    if (a % 30 === 0) {
+      var lp2 = toXY(R + 17, a);
+      octx.fillStyle = "rgba(0,255,100,0.52)";
+      octx.font = "10px IBM Plex Mono"; octx.textAlign = "center";
+      octx.fillText(a + "\u00b0", lp2[0], lp2[1] + 3);
+    }
+  }
+
+  // Baseline
+  octx.beginPath();
+  octx.moveTo(CX - R - 10, CY); octx.lineTo(CX + R + 10, CY);
+  octx.strokeStyle = "rgba(0,255,100,0.12)"; octx.lineWidth = 0.7; octx.stroke();
+
+  gridDirty = false;
+}
+
+function drawFan() {
+  // The fan is a narrow wedge trailing behind the needle.
+  // It should be BRIGHTER than the background, not darker.
+  //
+  // canvas.arc(cx, cy, r, startAngle, endAngle, anticlockwise)
+  // angles in canvas space = standard math angles BUT canvas y is flipped,
+  // so visually: angle 0 = right, positive = clockwise on screen
+  //
+  // Our toCanvasAngle: -(deg/180)*PI
+  //   deg=0   -> 0       (right)
+  //   deg=90  -> -PI/2   (top, because canvas y flipped means -PI/2 is up)
+  //   deg=180 -> -PI     (left)
+  //
+  // The needle points at toCanvasAngle(displayAngle).
+  // "Behind" = the region the sweep already passed.
+  // As servo increases from 0->180, the needle sweeps right->up->left.
+  // In canvas angle terms: 0 -> -PI/2 -> -PI  (decreasing, going CCW on screen)
+  // So "behind" = angles LARGER (less negative) than current = displayAngle - FAN_DEG .. displayAngle
+  //
+  // arc(cx,cy,r, start, end, false) draws CW from start to end.
+  // We want CCW from fanStart to needle: arc(..., fanStart, needle, true)
+
+  var needleCA = toCanvasAngle(displayAngle);
+  var fanCA    = toCanvasAngle(Math.max(0, displayAngle - FAN_DEG));
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(CX, CY);
+  // CCW from fanCA to needleCA fills the wedge between them correctly
+  ctx.arc(CX, CY, R, fanCA, needleCA, true);
+  ctx.closePath();
+
+  // Gradient: fades from transparent at trailing edge to green glow at needle
+  var p0 = toXY(R * 0.5, Math.max(0, displayAngle - FAN_DEG));
+  var p1 = toXY(R * 0.5, displayAngle);
+  var fg = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]);
+  fg.addColorStop(0,    "rgba(0,255,90,0.0)");
+  fg.addColorStop(0.5,  "rgba(0,255,90,0.07)");
+  fg.addColorStop(1,    "rgba(0,255,90,0.22)");
+  ctx.fillStyle = fg;
+  ctx.fill();
+  ctx.restore();
+}
+
+function renderLoop() {
+  requestAnimationFrame(renderLoop);
+
+  var diff = targetAngle - displayAngle;
+  displayAngle = Math.abs(diff) > 0.05 ? displayAngle + diff * LERP : targetAngle;
+
+  if (gridDirty) buildGrid();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(offscreen, 0, 0);  // static dark grid
+
+  // Fading trail dots
+  pts = pts.filter(function(p) { return (tick - p.tick) < FADE_TICKS; });
+  for (var i = 0; i < pts.length; i++) {
+    var p = pts[i];
+    var alpha = Math.max(0, 1 - (tick - p.tick) / FADE_TICKS);
+    var xy = toXY((p.dist / MAX_DIST) * R, p.angle);
+    ctx.beginPath(); ctx.arc(xy[0], xy[1], 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,255,100," + (alpha * 0.6).toFixed(3) + ")";
+    ctx.fill();
+  }
+
+  // Fan wedge only while scanning — hide when locked
+  if (!isLocked) drawFan();
+
+  // Needle glow + line — red when locked, green when scanning
+  var nxy = toXY(R, displayAngle);
+  var needleColor = isLocked ? "rgba(255,75,100,0.92)" : "rgba(0,255,100,0.92)";
+  var needleGlow  = isLocked ? "rgba(255,75,100,0.7)"  : "rgba(0,255,100,0.7)";
+  var needleSoft  = isLocked ? "rgba(255,75,100,0.07)" : "rgba(0,255,100,0.07)";
+  ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(nxy[0], nxy[1]);
+  ctx.strokeStyle = needleSoft;
+  ctx.lineWidth = 10; ctx.lineCap = "round"; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(nxy[0], nxy[1]);
+  ctx.strokeStyle = needleColor;
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = needleGlow; ctx.shadowBlur = 7;
+  ctx.stroke(); ctx.shadowBlur = 0; ctx.lineCap = "butt";
+  // When locked, draw a steady lock reticle at the target position
+  if (isLocked && lockedDist > 0) {
+    var lxy = toXY((lockedDist / MAX_DIST) * R, lockedAngle);
+    var pulse = 0.5 + 0.5 * Math.sin(performance.now() / 600);  // smooth 1s pulse
+
+    // Outer breathing ring
+    ctx.beginPath(); ctx.arc(lxy[0], lxy[1], 16 + pulse * 5, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,75,100," + (0.25 + pulse * 0.2).toFixed(2) + ")";
+    ctx.lineWidth = 1; ctx.stroke();
+
+    // Static inner ring
+    ctx.beginPath(); ctx.arc(lxy[0], lxy[1], 10, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,75,100,0.8)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Cross ticks at 4 cardinal points
+    var tickLen = 5, gap = 12;
+    ctx.strokeStyle = "rgba(255,75,100,0.9)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(lxy[0] - gap - tickLen, lxy[1]); ctx.lineTo(lxy[0] - gap, lxy[1]); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lxy[0] + gap, lxy[1]);           ctx.lineTo(lxy[0] + gap + tickLen, lxy[1]); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lxy[0], lxy[1] - gap - tickLen); ctx.lineTo(lxy[0], lxy[1] - gap); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lxy[0], lxy[1] + gap);           ctx.lineTo(lxy[0], lxy[1] + gap + tickLen); ctx.stroke();
+
+    // Center dot
+    ctx.beginPath(); ctx.arc(lxy[0], lxy[1], 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff4d6a";
+    ctx.shadowColor = "#ff4d6a"; ctx.shadowBlur = 10;
+    ctx.fill(); ctx.shadowBlur = 0;
+
+    // Distance label above reticle
+    ctx.font = "bold 10px IBM Plex Mono"; ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,220,80,0.95)";
+    ctx.fillText(lockedDist + "cm", lxy[0], lxy[1] - 24);
+    ctx.textAlign = "left";
+  }
+
+  // Object markers
+  for (var j = 0; j < objects.length; j++) {
+    var obj = objects[j];
+    var oxy = toXY((obj.dist / MAX_DIST) * R, obj.angle);
+    var ox = oxy[0], oy = oxy[1];
+    var fresh = (tick - obj.lastTick) < 120;
+    var col = fresh ? "rgba(255,75,100,0.95)" : "rgba(255,75,100,0.4)";
+    var arm = 9, b = 4;
+
+    ctx.strokeStyle = col; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(ox - arm, oy); ctx.lineTo(ox + arm, oy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox, oy - arm); ctx.lineTo(ox, oy + arm); ctx.stroke();
+
+    ctx.lineWidth = 1.5;
+    var corners = [[-1,-1],[1,-1],[1,1],[-1,1]];
+    for (var k = 0; k < corners.length; k++) {
+      var sx = corners[k][0], sy = corners[k][1];
+      ctx.beginPath();
+      ctx.moveTo(ox + sx * (arm + b), oy + sy * arm);
+      ctx.lineTo(ox + sx * (arm + b), oy + sy * (arm + b));
+      ctx.lineTo(ox + sx * arm,       oy + sy * (arm + b));
+      ctx.stroke();
+    }
+
+    ctx.font = "bold 10px IBM Plex Mono"; ctx.textAlign = "left";
+    ctx.fillStyle = fresh ? "rgba(255,220,80,1.0)" : "rgba(255,220,80,0.45)";
+    ctx.fillText("OBJ " + obj.id + "  " + obj.dist + "cm", ox + arm + 7, oy + 4);
+  }
+
+  // Origin dot
+  ctx.beginPath(); ctx.arc(CX, CY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "#00ff64";
+  ctx.shadowColor = "rgba(0,255,100,0.8)"; ctx.shadowBlur = 10;
+  ctx.fill(); ctx.shadowBlur = 0;
+}
+
+function process(angle, dist, locked) {
+  isLocked = !!locked;
+  if (isLocked) {
+    lockedAngle = angle;
+    lockedDist  = dist;
+    targetAngle = angle;  // keep needle aimed at locked object
+  } else {
+    targetAngle = angle;  // sweep normally
+  }
+  tick++;
+  document.getElementById("anum").textContent = angle;
+  updateLockUI();
+
+  if (dist > 0 && dist <= MAX_DIST) {
+    pts.push({angle: angle, dist: dist, tick: tick});
+    document.getElementById("adist").textContent = dist + " cm";
+    var bucket = Math.round(angle / 3) * 3;
+    if (!rawHits[bucket]) rawHits[bucket] = {dist: dist, count: 0, lastTick: tick};
+    rawHits[bucket].dist     = Math.round(rawHits[bucket].dist * 0.6 + dist * 0.4);
+    rawHits[bucket].count++;
+    rawHits[bucket].lastTick = tick;
+  } else {
+    document.getElementById("adist").textContent = "";
+    var bucket2 = Math.round(angle / 3) * 3;
+    if (rawHits[bucket2]) rawHits[bucket2].count = Math.max(0, rawHits[bucket2].count - 1);
+  }
+
+  var keys = Object.keys(rawHits);
+  for (var i = 0; i < keys.length; i++) {
+    if (tick - rawHits[keys[i]].lastTick > 250) delete rawHits[keys[i]];
+  }
+
+  promoteObjects();
+  objects = objects.filter(function(o) { return tick - o.lastTick < 300; });
+  updateSidebar();
+  updateFps();
+}
+
+function promoteObjects() {
+  var confirmed = [];
+  var keys = Object.keys(rawHits);
+  for (var i = 0; i < keys.length; i++) {
+    var h = rawHits[keys[i]];
+    if (h.count >= 5) confirmed.push({angle: parseInt(keys[i]), dist: h.dist, lastTick: h.lastTick});
+  }
+
+  confirmed.sort(function(a,b) { return a.angle - b.angle; });
+  var groups = [];
+  for (var i = 0; i < confirmed.length; i++) {
+    var pt = confirmed[i], found = false;
+    for (var j = 0; j < groups.length; j++) {
+      if (Math.abs(groups[j].angle - pt.angle) <= GROUP_DEG) {
+        groups[j].angle    = Math.round((groups[j].angle + pt.angle) / 2);
+        groups[j].dist     = Math.round((groups[j].dist  + pt.dist)  / 2);
+        groups[j].lastTick = Math.max(groups[j].lastTick, pt.lastTick);
+        found = true; break;
+      }
+    }
+    if (!found) groups.push({angle: pt.angle, dist: pt.dist, lastTick: pt.lastTick});
+  }
+
+  for (var i = 0; i < groups.length; i++) {
+    var cl = groups[i], existing = null;
+    for (var j = 0; j < objects.length; j++) {
+      if (Math.abs(objects[j].angle - cl.angle) <= GROUP_DEG) { existing = objects[j]; break; }
+    }
+    if (existing) {
+      existing.angle    = Math.round(existing.angle * 0.7 + cl.angle * 0.3);
+      existing.dist     = Math.round(existing.dist  * 0.7 + cl.dist  * 0.3);
+      existing.lastTick = cl.lastTick;
+    } else {
+      objects.push({angle: cl.angle, dist: cl.dist, lastTick: cl.lastTick, id: nextId++});
+    }
+  }
+}
+
+function updateLockUI() {
+  var el = document.getElementById("lock-badge");
+  var angleEl = document.getElementById("anum");
+  var distEl = document.getElementById("adist");
+  var scanEl = document.getElementById("scan-badge");
+  if (isLocked) {
+    el.style.display = "flex";
+    scanEl.style.display = "none";
+    angleEl.style.color = "rgba(255,75,100,0.9)";
+  } else {
+    el.style.display = "none";
+    scanEl.style.display = "flex";
+    angleEl.style.color = "rgba(0,255,100,0.82)";
+  }
+}
+
+function updateSidebar() {
+  document.getElementById("ocount").innerHTML = objects.length + "<span>found</span>";
+  var el = document.getElementById("dlist"); el.innerHTML = "";
+  var sorted = objects.slice().sort(function(a,b) { return a.id - b.id; });
+  for (var i = 0; i < sorted.length; i++) {
+    var o = sorted[i], row = document.createElement("div");
+    row.className = "det-row";
+    row.innerHTML = "<span class=\"a\">" + o.angle + "\u00b0</span>" +
+                    "<span class=\"d\">" + o.dist + "cm</span>" +
+                    "<span class=\"c\">OBJ " + o.id + "</span>";
+    el.appendChild(row);
+  }
+}
+
+function updateFps() {
+  fpsCount++;
+  var now = performance.now();
+  if (now - lastFpsT >= 1000) {
+    document.getElementById("sf").textContent = Math.round(fpsCount * 1000 / (now - lastFpsT)) + " fps";
+    document.getElementById("fps-row").style.opacity = "1";
+    fpsCount = 0; lastFpsT = now;
+  }
+}
+
+async function connectSerial() {
+  if (!navigator.serial) { alert("Web Serial requires Chrome or Edge."); return; }
+  try {
+    stopAll();
+    var port = await navigator.serial.requestPort();
+    await port.open({baudRate: 9600});
+    document.getElementById("bser").classList.add("live");
+    document.getElementById("bser").textContent = "Connected \u2713";
+    document.getElementById("bdemo").classList.remove("on");
+    document.getElementById("sd").className = "dot live";
+    document.getElementById("sm").textContent = "live \u2014 serial";
+    var dec = new TextDecoderStream();
+    port.readable.pipeTo(dec.writable);
+    var reader = dec.readable.getReader();
+    serialRdr = reader; var buf = "";
+    (async function() {
+      try {
+        while (true) {
+          var res = await reader.read(); if (res.done) break;
+          buf += res.value;
+          var lines = buf.split("\n"); buf = lines.pop();
+          for (var i = 0; i < lines.length; i++) {
+            var parts = lines[i].trim().split(",");
+            if (parts.length >= 2) {
+              var a = parseInt(parts[0]), d = parseInt(parts[1]);
+              if (!isNaN(a) && !isNaN(d) && a >= 0 && a <= 180) process(a, d, parts.length >= 3 && parts[2].trim() === "L");
+            }
+          }
+        }
+      } catch(e) {
+        document.getElementById("sd").className = "dot warn";
+        document.getElementById("sm").textContent = "disconnected";
+        document.getElementById("bser").classList.remove("live");
+        document.getElementById("bser").textContent = "Connect serial";
+      }
+    })();
+  } catch(e) { if (e.name !== "NotFoundError") document.getElementById("sm").textContent = "error \u2014 retry"; }
+}
+
+function setDemo() {
+  stopAll();
+  document.getElementById("bdemo").classList.add("on");
+  document.getElementById("bser").classList.remove("live");
+  document.getElementById("bser").textContent = "Connect serial";
+  document.getElementById("sd").className = "dot";
+  document.getElementById("sm").textContent = "demo mode";
+  demoAng = 0; demoFwd = true;
+  demoInt = setInterval(function() {
+    var dist = 0;
+    for (var i = 0; i < DEMO_OBJS.length; i++) {
+      if (Math.abs(demoAng - DEMO_OBJS[i].a) < 5)
+        dist = Math.round(DEMO_OBJS[i].d + (Math.random() - 0.5) * 2);
+    }
+    process(demoAng, dist, false);
+    if (demoFwd) { demoAng += 2; if (demoAng >= 180) { demoAng = 180; demoFwd = false; } }
+    else         { demoAng -= 2; if (demoAng <= 0)   { demoAng = 0;   demoFwd = true;  } }
+  }, 28);
+}
+
+function stopAll() {
+  if (demoInt)   { clearInterval(demoInt); demoInt = null; }
+  if (serialRdr) { try { serialRdr.cancel(); } catch(e) {} serialRdr = null; }
+}
+
+function clearAll() {
+  pts = []; rawHits = {}; objects = []; nextId = 1;
+  updateSidebar();
+}
+
+window.addEventListener("resize", function() { resize(); gridDirty = true; });
+resize(); buildGrid(); renderLoop();
+</script>
+</body>
+</html>
