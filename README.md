@@ -9,7 +9,7 @@ This project is an iteration of [Project 1 — Ultrasonic Distance Alert](#), ex
 
 ## Demo
 
-*(Insert GIF or video here)*
+[Demonstration of Arduino Radar](https://youtu.be/2p2849d0rUQ)
 
 ---
 
@@ -62,9 +62,7 @@ Connects to the Nano via the Web Serial API (Chrome only). Parses the serial str
 
 ---
 
-## Photos
 
-*(Insert hardware photos here)*
 
 ---
 
